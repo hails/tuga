@@ -1,13 +1,24 @@
+#[macro_use]
+extern crate diesel;
+
 use std::env;
 
 use futures::StreamExt;
 use telegram_bot::*;
+
 mod commands;
+mod database;
+mod models;
+mod process;
+mod scheduler;
+mod schema;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
-    let api = Api::new(token);
+    let api = Api::new(&token);
+
+    scheduler::start(token.clone());
 
     // Fetch new updates via long poll method
     let mut stream = api.stream();

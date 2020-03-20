@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html data-spy="scroll">
+
+<head>
+    <title>Justi�a.gov.pt</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1.0">
+    <link rel="stylesheet" href="/layout/assets/css/bundle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body data-gr-c-s-loaded="true" class="active">
+    <div class="container-fluid" id="index">
+        <nav class="navbar menuDesktop fixed-close">
+            <div class="header">
+                <div class="container">
+                    <a href="https://justica.gov.pt/">
+                        <img src="/layout/assets/images/logo.png" alt="Logo Justiça.gov.pt">
+                    </a>
+
+                </div>
+            </div>
+
+        </nav>
+        <div class="navbar navbar-default menuMobile d-none" role="navigation">
+            <div class="navbar-header container">
+                <a href="https://justica.gov.pt/" title="Home">
+                    <img src="/layout/assets/images/logo.png" alt="Logo Justiça.gov.pt">
+                </a>
+
+            </div>
+
+        </div>
+        <!-- Conteúdo da página -->
+        <section>
+            <div class="container" style="padding-top: 140px; padding-bottom:120px;">
+
+                <script src="/Scripts/jquery-3.3.1.min.js"></script>
+                <script src="/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+
+
+                <div class="row" style="margin:0 0 0 0;">
+                    <div class="panel-heading">
+                        <div>
+                            <h3>
+                                <span>Qual é o estado do meu processo de nacionalidade</span>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="search-form">
+                    <script src="/Scripts/jquery.mask.min.js"></script>
+                    <script type="text/javascript">
+                        function onBegin() {
+                            $('#btnPesquisa').prop('disabled', true);
+                            $("#txtInformacao").hide();//para esconder o texto informativo
+                            $("#search-results").hide();//para esconder o texto informativo
+
+                            $("#divLoading").html('<image src="../Content/ajax-loader.gif" alt="Loading, please wait" />');
+                        }
+                        function onComplete() {
+                            $("#divLoading").html("");
+                            $("#search-results").show();//para esconder o texto informativo
+                            $('#btnPesquisa').prop('disabled', false);
+                        }
+
+                        $(document).ready(function ($) {
+                            $('#btnPesquisa').prop('disabled', true);
+                            var options = {
+                                onComplete: function (SenhaAcesso) {
+                                    $('#btnPesquisa').prop('disabled', false);
+                                },
+                                onChange: function (SenhaAcesso) {
+                                    if (SenhaAcesso.length < 14) {
+                                        $('#btnPesquisa').prop('disabled', true);
+                                    }
+                                }
+                            };
+                            $('#SenhaAcesso').mask('AAAA-AAAA-AAAA', options);
+
+                        });
+
+                    </script>
+
+                    <form action="/Home/GetEstadoProcessoAjax" data-ajax="true" data-ajax-begin="onBegin"
+                        data-ajax-complete="onComplete" data-ajax-method="POST" data-ajax-mode="replace"
+                        data-ajax-update="#search-results" id="form0" method="post" _lpchecked="1"><input
+                            name="__RequestVerificationToken" type="hidden"
+                            value="NHIQM9P8xVHR6EGD5FiUw1dMAzz9O8NZWqfvuGHoSrm6kE4XKXWDwtXFcaSD8pBs4rDFClLONbEAdhXQOinm3h6zUmbMNgYP6vAdqiLDTo41">
+                        <div>
+                            <label for="Indique_a_sua_senha_de_acesso">Indique a sua senha de acesso</label>
+                            <input class="form-input" id="SenhaAcesso" name="SenhaAcesso" placeholder="xxxx-xxxx-xxxx"
+                                type="text" value="" maxlength="14">
+
+
+                            <style type="text/css">
+                                .masked {
+                                    display: none;
+                                }
+                            </style>
+                            <input name="FC4A9080D42D2D712478C27B92C595DB" type="hidden"
+                                id="FC4A9080D42D2D712478C27B92C595DB"><input name="Email" type="email" id="Email"
+                                class="masked">
+
+                            <input id="btnPesquisa" type="submit" value="Pesquisar">
+                        </div>
+                    </form>
+                    <!-- loading div -->
+                    <div id="divLoading"></div>
+                    <!--results of the search-->
+                    <div id="search-results" style="padding-top: 50px;">
+                        <link href="/layout/assets/css/grafico_nacionalidade.css" rel="stylesheet">
+                        <style>
+                            .titulo {
+                                color: #3399cc;
+                            }
+
+                            /*Bloco para o estado do processo*/
+                            #block_container {
+                                font-size: 1.5rem;
+                                font-weight: bold;
+                            }
+
+                            #bloc1 {
+                                display: inline;
+                            }
+
+                            #bloc2 {
+                                display: inline;
+                                font-size: 1rem;
+                                font-weight: normal;
+                            }
+
+                            /*-------------------------------------*/
+                        </style>
+                        <div>
+
+
+                            <div id="block_container">
+
+                                <div id="bloc1">Estado do processo 96972 / 2019</div>
+                                <div id="bloc2">(315 - Art. 1º C - Atribuição (nasc. estrangeiro))</div>
+
+                            </div>
+                            <div style="font-weight: bold;">O processo encontra-se na Conservatória do Registo Civil de
+                                Tondela </div>
+                            <div style="color:#335779; font-size:1.3em;">ANDREA MORGADO DOS SANTOS</div>
+                            <!-- completed = 1-->
+                            <!-- active = 2-->
+                            <!-- active2 = 3-->
+                            <!-- Gráfico-->
+                            <br>
+                            <br>
+                            <div class="titulo">Detalhe do estado do processo de nacionalidade</div>
+                            <div class="container">
+                                <section class="step-indicator" style="float:none;">
+                                    <div class="step step1 active1">
+                                        <div class="step-icon">1</div>
+                                        <p>Foi recebido</p>
+                                    </div>
+                                    <div class="indicator-line active"></div>
+                                    <div class="step step2 active3">
+                                        <div class="step-icon">2</div>
+                                        <p>Foi registado</p>
+                                    </div>
+                                    <div class="indicator-line"></div>
+                                    <div class="step step3 ">
+                                        <div class="step-icon">3</div>
+                                        <p>Aguarda consultas</p>
+                                    </div>
+                                    <div class="indicator-line"></div>
+                                    <div class="step step4 ">
+                                        <div class="step-icon">4</div>
+                                        <p>Verificação documentos</p>
+                                    </div>
+                                    <div class="indicator-line"></div>
+                                    <div class="step step5 ">
+                                        <div class="step-icon">5</div>
+                                        <p>Análise pedido</p>
+                                    </div>
+                                    <div class="indicator-line"></div>
+                                    <div class="step step6 ">
+                                        <div class="step-icon">6</div>
+                                        <p>Despacho</p>
+                                    </div>
+                                    <div class="indicator-line"></div>
+                                    <div class="step step7 ">
+                                        <div class="step-icon">7</div>
+                                        <p>Terminado</p>
+                                    </div>
+                                </section>
+                            </div>
+                            <br>
+                            <div class="container">
+
+                            </div>
+                            <div class="container">Os serviços estão a preparar a documentação e informação para a
+                                análise do seu pedido.<br><br> </div>
+                            <br>
+                            <br>
+                            <div class="titulo">Sobre o processamento dos pedidos de nacionalidade<br><br></div>
+                            <div>
+                                <div> Um pedido de nacionalidade segue os seguintes passos:</div>
+
+                                <div>1. Receção do pedido, numa conservatória, consulado ou por correio</div>
+                                <div>2. Registo do pedido</div>
+                                <div>3. Consulta a entidades externas</div>
+                                <div>4. Verificação da documentação entregue</div>
+                                <div>5. Análise de que todas as condições legalmente previstas estão reunidas para
+                                    conceder a nacionalidade</div>
+                                <div>6. Decisão sobre a atribuição ou não da nacionalidade</div>
+                                <div>7. Registo do novo cidadão português no Registo Civil de Portugal ou arquivamento
+                                    do processo</div>
+
+                            </div>
+
+
+                        </div>
+                        <hr>
+                        <p>
+                            <a href="/Home/PesquisaProcesso">Voltar</a>
+                        </p>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+        </section>
+        <!--Fim do conteúdo da página-->
+        <footer class="scrollerSection pagefooter">
+
+            <div class="container">
+                <div class="footer-bottom">
+                    <div class="container">
+
+
+                        <div class="row imgsFooter">
+                            <div class="col-lg-3 col-sm-3"><img src="/layout/assets/images/logojust.png"></div>
+                            <div class="col-lg-6 col-sm-6">
+                                <p>Cofinanciado por</p><img src="/layout/assets/images/compete.png">
+                            </div>
+                            <div class="col-lg-3 col-sm-3">
+                                <img src="/layout/assets/images/jproxima.png">
+                                <img src="/layout/assets/images/republicaportuguesa.png">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <div class="loader d-none"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="/layout/assets/js/bootstrap-toolkit.min.js"></script>
+    <script src="/layout/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="/layout/assets/js/jquery.scrollify.js"></script>
+    <script src="/layout/assets/js/jquery.scroll.js"></script>
+    <script src="/layout/assets/js/jquery.menu.js"></script>
+    <script src="/layout/assets/js/underscore-min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="/layout/assets/js/jquery.main.js"></script>
+
+    <div class="responsive-bootstrap-toolkit">
+        <div class="device-xs visible-xs visible-xs-block"></div>
+        <div class="device-sm visible-sm visible-sm-block"></div>
+        <div class="device-md visible-md visible-md-block"></div>
+        <div class="device-lg visible-lg visible-lg-block"></div>
+    </div>
+</body>
+
+</html>

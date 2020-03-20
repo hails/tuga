@@ -1,8 +1,6 @@
-use regex::Regex;
-use reqwest;
-use select::document::Document;
-use select::predicate::{Class, Name, Predicate};
 use telegram_bot::*;
+
+use crate::process;
 
 pub async fn start(api: &Api, message: &Message) -> Result<(), Error> {
     api.send(message.text_reply(format!(
@@ -25,13 +23,15 @@ pub async fn invalid(api: &Api, message: &Message) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn code(api: &Api, message: &Message, data: &String) -> Result<(), Error> {
+pub async fn code(api: &Api, message: &Message, data: &str) -> Result<(), Error> {
     let code: String = data.split_whitespace().skip(1).take(1).collect();
 
     let reply = if code.is_empty() {
         String::from("Você me precisa me enviar algum código")
     } else {
-        let process = fetch_citizenship_status(&code).await.unwrap();
+        let process = process::start(message.from.id.to_string(), code)
+            .await
+            .unwrap();
         format!(
             "Status: {}\n\
             Mensagem: {}",
@@ -42,45 +42,4 @@ pub async fn code(api: &Api, message: &Message, data: &String) -> Result<(), Err
     api.send(message.text_reply(reply)).await?;
 
     Ok(())
-}
-
-struct Process {
-    status: String,
-    info: String,
-}
-
-async fn fetch_citizenship_status(code: &String) -> Result<Process, reqwest::Error> {
-    let res = reqwest::Client::new()
-        .post("https://nacionalidade.justica.gov.pt/Home/GetEstadoProcessoAjax")
-        .form(&[("SenhaAcesso", code)])
-        .send()
-        .await?;
-    let body = res.text().await?;
-
-    let document = Document::from(body.as_str());
-
-    let mut process = Process {
-        status: String::from("Unknown"),
-        info: String::from(""),
-    };
-
-    if let Some(st) = document.find(Class("active1").descendant(Name("p"))).last() {
-        process.status = st.text();
-    }
-
-    if let Some(st) = document.find(Class("active2").descendant(Name("p"))).last() {
-        process.status = st.text();
-    }
-
-    if let Some(st) = document.find(Class("active3").descendant(Name("p"))).last() {
-        process.status = st.text();
-    }
-
-    if let Some(st) = document.find(Class("container")).last() {
-        let re = Regex::new(r"\s+").unwrap();
-
-        process.info = re.replace_all(&st.text(), " ").trim().to_string();
-    }
-
-    Ok(process)
 }
