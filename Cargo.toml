@@ -14,4 +14,3 @@ scraper = { git = "https://github.com/causal-agent/scraper"}
 reqwest = { version = "0.10.4" }
 select = {version = "0.4.3"}
 regex = "1"
-

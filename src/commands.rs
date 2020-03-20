@@ -76,7 +76,7 @@ async fn fetch_citizenship_status(code: &String) -> Result<Process, reqwest::Err
         process.status = st.text();
     }
 
-    if let Some(st) = document.find(Class("container")).nth(5) {
+    if let Some(st) = document.find(Class("container")).last() {
         let re = Regex::new(r"\s+").unwrap();
 
         process.info = re.replace_all(&st.text(), " ").trim().to_string();
