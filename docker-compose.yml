@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  database:
+    image: postgres:12.2-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tuga
+    ports:
+      - 5432:5432
+
+  bot:
+    build: .
+    command: cargo run
+    volumes:
+      - .:/app
+      - target:/app/target
+    depends_on:
+      - database
+    env_file:
+      - .env
+
+volumes:
+  target:
