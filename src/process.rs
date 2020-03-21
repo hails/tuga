@@ -20,7 +20,9 @@ pub async fn start(
     process_code: String,
 ) -> Result<ProcessResponse, Box<dyn error::Error>> {
     let p = fetch_for_one(&process_code).await?;
-    save(&telegram_id, &process_code, &p.status).await;
+    if p.status != "unknown" {
+        save(&telegram_id, &process_code, &p.status).await;
+    }
 
     Ok(p)
 }
