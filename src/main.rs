@@ -3,6 +3,8 @@ extern crate diesel;
 
 use std::env;
 
+#[macro_use]
+extern crate diesel_migrations;
 use futures::StreamExt;
 use telegram_bot::*;
 
@@ -13,8 +15,13 @@ mod process;
 mod scheduler;
 mod schema;
 
+embed_migrations!();
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    let db_connection = database::establish_connection();
+    embedded_migrations::run(&db_connection).unwrap();
+
     let token = env::var("TELEGRAM_BOT_TOKEN").expect("TELEGRAM_BOT_TOKEN not set");
     let api = Api::new(&token);
 
