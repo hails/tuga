@@ -17,7 +17,7 @@ pub struct ProcessResponse {
 
 pub async fn start(
     telegram_id: String,
-    process_code: String,
+    process_code: &str,
 ) -> Result<ProcessResponse, Box<dyn error::Error>> {
     let p = fetch_for_one(&process_code).await?;
     if p.status != "unknown" {
