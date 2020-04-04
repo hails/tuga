@@ -6,6 +6,7 @@ use std::env;
 #[macro_use]
 extern crate diesel_migrations;
 use futures::StreamExt;
+use regex::Regex;
 use telegram_bot::*;
 
 mod commands;
@@ -27,6 +28,9 @@ async fn main() -> Result<(), Error> {
 
     scheduler::start(token.clone());
 
+    let formatted_code_re = Regex::new(r"^\d{4}-\d{4}-\d{4}$").unwrap();
+    let unformatted_code_re = Regex::new(r"^\d{4}\d{4}\d{4}$").unwrap();
+
     // Fetch new updates via long poll method
     let mut stream = api.stream();
     while let Some(update) = stream.next().await {
@@ -36,8 +40,11 @@ async fn main() -> Result<(), Error> {
             if let MessageKind::Text { ref data, .. } = message.kind {
                 match data.as_str() {
                     "/start" => commands::start(&api, &message).await?,
-                    command if command.starts_with("/code") => {
-                        commands::code(&api, &message, data).await?
+                    command if formatted_code_re.is_match(command) => {
+                        commands::process_code(&api, &message, data).await?
+                    }
+                    command if unformatted_code_re.is_match(command) => {
+                        commands::process_unformatted_code(&api, &message, data).await?
                     }
                     _ => commands::invalid(&api, &message).await?,
                 }

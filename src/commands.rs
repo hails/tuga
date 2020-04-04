@@ -5,8 +5,7 @@ use crate::process;
 pub async fn start(api: &Api, message: &Message) -> Result<(), Error> {
     api.send(message.text_reply(format!(
         "Olá, {}! Esse bot irá lhe ajudar a acompanhar o estado do seu processo.\n\
-            Para começarmos, preciso que me envie o código do processo.\n\
-            Simplesmente digite /code CODIGO que comecarei a acompanhar.",
+            Para começarmos, preciso que me envie o código do processo.",
         message.from.first_name
     )))
     .await?;
@@ -14,30 +13,33 @@ pub async fn start(api: &Api, message: &Message) -> Result<(), Error> {
 }
 
 pub async fn invalid(api: &Api, message: &Message) -> Result<(), Error> {
-    api.send(message.text_reply(
-        "Command not found!\n\
-                Use /help to list the available commands",
-    ))
-    .await?;
+    api.send(message.text_reply("Comando ou codigo inválido"))
+        .await?;
+
+    start(&api, &message).await?;
 
     Ok(())
 }
 
-pub async fn code(api: &Api, message: &Message, data: &str) -> Result<(), Error> {
-    let code: String = data.split_whitespace().skip(1).take(1).collect();
+pub async fn process_unformatted_code(
+    api: &Api,
+    message: &Message,
+    code: &str,
+) -> Result<(), Error> {
+    let code = format!("{}-{}-{}", &code[0..4], &code[4..8], &code[8..12]);
+    println!("{}", code);
+    process_code(&api, &message, &code).await
+}
 
-    let reply = if code.is_empty() {
-        String::from("Você me precisa me enviar algum código")
-    } else {
-        let process = process::start(message.from.id.to_string(), code)
-            .await
-            .unwrap();
-        format!(
-            "Status: {}\n\
-            Mensagem: {}",
-            process.status, process.info
-        )
-    };
+pub async fn process_code(api: &Api, message: &Message, code: &str) -> Result<(), Error> {
+    let process = process::start(message.from.id.to_string(), code)
+        .await
+        .unwrap();
+    let reply = format!(
+        "Status: {}\n\
+        Mensagem: {}",
+        process.status, process.info
+    );
 
     api.send(message.text_reply(reply)).await?;
 
