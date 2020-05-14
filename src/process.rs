@@ -18,16 +18,18 @@ pub struct ProcessResponse {
 pub async fn start(
     telegram_id: String,
     process_code: &str,
-) -> Result<ProcessResponse, Box<dyn error::Error>> {
+) -> Result<Option<ProcessResponse>, Box<dyn error::Error>> {
     let p = fetch_for_one(&process_code).await?;
-    if p.status != "unknown" {
-        save(&telegram_id, &process_code, &p.status).await;
+    if let Some(process) = &p {
+        save(&telegram_id, &process_code, &process.status).await;
     }
 
     Ok(p)
 }
 
-async fn fetch_for_one(process_code: &str) -> Result<ProcessResponse, Box<dyn error::Error>> {
+async fn fetch_for_one(
+    process_code: &str,
+) -> Result<Option<ProcessResponse>, Box<dyn error::Error>> {
     Ok(fetch_citizenship_status(&process_code).await?)
 }
 
@@ -56,29 +58,42 @@ pub async fn fetch_for_all() -> Result<Vec<(String, ProcessResponse)>, Box<dyn e
     let mut updated_processes = Vec::new();
     for process in user_processes {
         let process_response = fetch_for_one(&process.code).await?;
-        if process_response.status.to_lowercase() != process.status {
-            save(
-                &process.telegram_user_id,
-                &process.code,
-                &process_response.status,
-            )
-            .await;
-            updated_processes.push((process.telegram_user_id, process_response));
+        if let Some(process_response) = process_response {
+            if process_response.status.to_lowercase() != process.status {
+                save(
+                    &process.telegram_user_id,
+                    &process.code,
+                    &process_response.status,
+                )
+                .await;
+                updated_processes.push((process.telegram_user_id, process_response));
+            }
         }
     }
 
     Ok(updated_processes)
 }
 
-async fn fetch_citizenship_status(process_code: &str) -> Result<ProcessResponse, reqwest::Error> {
+async fn fetch_citizenship_status(
+    process_code: &str,
+) -> Result<Option<ProcessResponse>, reqwest::Error> {
+    let process_body = fetch_process(process_code).await?;
+    let process_status = process_status(process_body);
+    Ok(process_status)
+}
+
+async fn fetch_process(process_code: &str) -> Result<String, reqwest::Error> {
     let res = reqwest::Client::new()
         .post("https://nacionalidade.justica.gov.pt/Home/GetEstadoProcessoAjax")
         .form(&[("SenhaAcesso", process_code)])
         .send()
         .await?;
-    let body = res.text().await?;
 
-    let document = Document::from(body.as_str());
+    Ok(res.text().await?)
+}
+
+fn process_status(html: String) -> Option<ProcessResponse> {
+    let document = Document::from(html.as_str());
 
     let mut p = ProcessResponse {
         status: String::from("unknown"),
@@ -103,5 +118,9 @@ async fn fetch_citizenship_status(process_code: &str) -> Result<ProcessResponse,
         p.info = re.replace_all(&st.text(), " ").trim().to_string();
     }
 
-    Ok(p)
+    if p.status == "unknown" {
+        return None;
+    }
+
+    return Some(p);
 }

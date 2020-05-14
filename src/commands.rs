@@ -35,11 +35,15 @@ pub async fn process_code(api: &Api, message: &Message, code: &str) -> Result<()
     let process = process::start(message.from.id.to_string(), code)
         .await
         .unwrap();
-    let reply = format!(
-        "Status: {}\n\
-        Mensagem: {}",
-        process.status, process.info
-    );
+    let reply = if let Some(process) = process {
+        format!(
+            "Status: {}\n\
+            Mensagem: {}",
+            process.status, process.info
+        )
+    } else {
+        "Processo não encontrado ou com status desconhecido.".to_owned()
+    };
 
     api.send(message.text_reply(reply)).await?;
 
